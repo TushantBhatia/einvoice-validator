@@ -1,4 +1,4 @@
-# E-Invoice Validator (EN 16931 + BR-FR)
+# E-Invoice Validator (EN 16931 + French rules)
 
 A browser-based validator for UBL invoices and credit notes, and for CDAR life-cycle messages.
 
@@ -7,20 +7,23 @@ A browser-based validator for UBL invoices and credit notes, and for CDAR life-c
 Validation runs entirely in your browser. XML files are read locally and are never sent to any server.
 You can also download `index.html` and open it offline.
 
-## Rules
+## Checks
 
-| Document | Rule sets |
+| Document | Checks |
 |---|---|
-| UBL Invoice / CreditNote | EN 16931 (CEN/TC 434 validation artefacts 1.3.17) and French BR-FR rules (FNFE-MPE France_RFE 1.4.0.04) |
-| CDAR | BR-FR-CDV (FNFE-MPE France_RFE 1.4.0.04) |
+| UBL Invoice / CreditNote | UBL 2.1 XSD schema, then the business rules for the document's profile: **EXTENDED-CTC-FR** when the CustomizationID is the French extended profile, otherwise **EN 16931** (CEN/TC 434 1.3.17). The French **BR-FR** rules run in both cases. |
+| CDAR | BR-FR-CDV |
 
-It does not check against the UBL XSD schemas, and it does not run any platform-specific checks.
+All French rules and the UBL XSD come from FNFE-MPE France_RFE 1.4.0.04.
+
+Platform-side checks are not covered, for example the national directory (annuaire), duplicate detection and sender onboarding.
 A PASSED result does not guarantee that a platform will accept the document.
 
 ## Third-party components
 
 - **EN 16931 validation artefacts**: © CEN/TC 434, EUPL 1.2. Source: https://github.com/ConnectingEurope/eInvoicing-EN16931
-- **French BR-FR schematrons**: © FNFE-MPE, Apache License 2.0. Source: https://github.com/fnfempe/France_RFE (see `licenses/`)
+- **French rules (BR-FR, EXTENDED-CTC-FR, BR-FR-CDV) and UBL 2.1 XSD**: FNFE-MPE France_RFE, Apache License 2.0. Source: https://github.com/fnfempe/France_RFE (see `licenses/`)
+- **xmllint-wasm** (libxml2 compiled to WebAssembly): MIT (see `licenses/`)
 - **SaxonJS 2.7**: © Saxonica Ltd, redistributed unmodified in binary form under the SaxonJS licence (see `licenses/`).
   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS." ANY EXPRESS OR IMPLIED WARRANTIES,
   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
