@@ -1,6 +1,6 @@
 # E-Invoice Validator (EN 16931 + French rules)
 
-A browser-based validator for UBL invoices and credit notes, and for CDAR life-cycle messages.
+A browser-based validator for UBL invoices and credit notes, CDAR life-cycle messages and Flux 10 e-reporting files.
 
 **Open the validator:** https://tushantbhatia.github.io/einvoice-validator/
 
@@ -13,8 +13,9 @@ You can also download `index.html` and open it offline.
 |---|---|
 | UBL Invoice / CreditNote | UBL 2.1 XSD schema, then the business rules for the document's profile: **EXTENDED-CTC-FR** when the CustomizationID is the French extended profile, otherwise **EN 16931** (CEN/TC 434 1.3.17). The French **BR-FR** rules run in both cases. |
 | CDAR | BR-FR-CDV |
+| Flux 10 e-reporting (`<Report>`: transactions 10.1/10.3, payments 10.2/10.4) | Flux 10 XSD and Flux 10 rules (PPF Annexe 7 v1.8) |
 
-All French rules and the UBL XSD come from FNFE-MPE France_RFE 1.4.0.04.
+All French rules and the UBL and Flux 10 XSDs come from FNFE-MPE France_RFE 1.4.0.04.
 
 Platform-side checks are not covered, for example the national directory (annuaire), duplicate detection and sender onboarding.
 A PASSED result does not guarantee that a platform will accept the document.
