@@ -5,105 +5,241 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>E-Invoice Validator</title>
 <style>
+/* Design system: ui-ux-pro-max "Minimalism & Swiss Style" + "B2B Service" light palette */
 :root{
-  --bg:#f5f6f8; --panel:#fff; --text:#1d2330; --muted:#5d6676; --line:#dfe3ea;
-  --accent:#1f5fbf; --accent-soft:#e8f0fc;
-  --ok:#17803d; --ok-soft:#e6f4ea; --bad:#b3261e; --bad-soft:#fbe9e7;
-  --warn:#9a5b00; --warn-soft:#fff3dc; --code:#f0f2f5;
-}
-@media (prefers-color-scheme: dark){
-  :root{
-    --bg:#14171c; --panel:#1d2128; --text:#e6e9ef; --muted:#9aa3b2; --line:#2e343e;
-    --accent:#7aa7ff; --accent-soft:#1f2a3d;
-    --ok:#5cc983; --ok-soft:#173022; --bad:#ff8a80; --bad-soft:#3a1d1b;
-    --warn:#f2b45a; --warn-soft:#3a2c14; --code:#262b33;
-  }
+  --primary:#0F172A; --on-primary:#FFFFFF;
+  --accent:#0369A1; --accent-hover:#075985; --accent-soft:#E0F2FE;
+  --bg:#F8FAFC; --card:#FFFFFF; --fg:#020617; --fg-2:#334155;
+  --muted:#E8ECF1; --muted-fg:#475569; --border:#E2E8F0; --border-strong:#CBD5E1;
+  --ok:#047857; --ok-soft:#ECFDF5; --ok-line:#A7F3D0;
+  --bad:#B91C1C; --bad-soft:#FEF2F2; --bad-line:#FECACA;
+  --warn:#92400E; --warn-soft:#FFFBEB; --warn-line:#FDE68A;
+  --ring:#0369A1;
+  --radius:12px; --radius-sm:8px;
+  --shadow:0 1px 2px rgba(15,23,42,.06),0 1px 3px rgba(15,23,42,.04);
+  --font:"Segoe UI Variable Text","Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+  --mono:"Cascadia Mono","Cascadia Code",Consolas,"SFMono-Regular",Menlo,monospace;
+  color-scheme:light;
 }
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);
-  font:14px/1.5 "Segoe UI",system-ui,-apple-system,Arial,sans-serif}
-header{background:var(--panel);border-bottom:1px solid var(--line);padding:16px 24px}
-header h1{margin:0;font-size:20px}
-header p{margin:2px 0 0;color:var(--muted);font-size:13px}
-main{max-width:1200px;margin:0 auto;padding:20px 24px 48px}
-.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px;margin-bottom:18px}
-#drop{border:2px dashed var(--line);border-radius:10px;padding:34px 16px;text-align:center;cursor:pointer;
-  transition:background .15s,border-color .15s}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.55 var(--font);-webkit-font-smoothing:antialiased}
+svg{flex:none}
+.hidden{display:none !important}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
+:focus-visible{outline:2px solid var(--ring);outline-offset:2px;border-radius:6px}
+
+/* header */
+.topbar{background:var(--card);border-bottom:1px solid var(--border)}
+.topbar-inner{max-width:1160px;margin:0 auto;padding:16px 24px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:12px;min-width:0;flex:1 1 420px}
+.logo{width:40px;height:40px;border-radius:10px;background:var(--primary);color:var(--on-primary);display:grid;place-items:center}
+.brand h1{margin:0;font-size:18px;line-height:1.25;font-weight:650;letter-spacing:-.01em}
+.brand p{margin:2px 0 0;color:var(--muted-fg);font-size:13.5px}
+.privacy{margin-left:auto;display:inline-flex;align-items:center;gap:8px;padding:7px 12px;border-radius:999px;
+  background:var(--ok-soft);color:var(--ok);border:1px solid var(--ok-line);font-size:13px;font-weight:600}
+
+main{max-width:1160px;margin:0 auto;padding:24px 24px 56px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow)}
+
+/* upload */
+.upload{padding:20px}
+#drop{border:1.5px dashed var(--border-strong);border-radius:var(--radius);background:var(--bg);
+  padding:36px 20px;text-align:center;cursor:pointer;transition:border-color .2s ease,background-color .2s ease}
+#drop:hover{border-color:var(--accent)}
 #drop.over{border-color:var(--accent);background:var(--accent-soft)}
-#drop.disabled{opacity:.55;cursor:progress}
-#drop strong{font-size:16px}
-#drop p{margin:6px 0 0;color:var(--muted)}
-.controls{display:flex;flex-wrap:wrap;gap:16px;align-items:center;margin-top:14px}
-.controls label{display:flex;gap:6px;align-items:center;cursor:pointer}
-.rules{color:var(--muted);font-size:12.5px;margin-left:auto}
-button{font:inherit;border:1px solid var(--line);background:var(--panel);color:var(--text);
-  border-radius:6px;padding:5px 12px;cursor:pointer}
-button:hover{border-color:var(--accent)}
-.result{padding:0;overflow:hidden}
-.rhead{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;padding:14px 18px;border-bottom:1px solid var(--line)}
-.badge{font-weight:700;font-size:12px;letter-spacing:.04em;padding:4px 10px;border-radius:20px}
-.PASSED{color:var(--ok);background:var(--ok-soft)} .FAILED{color:var(--bad);background:var(--bad-soft)}
-.RUNNING{color:var(--muted);background:var(--code)}
-.fname{font-weight:600;word-break:break-all}
-.meta{color:var(--muted);font-size:13px}
-.rhead .actions{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.counts{display:flex;gap:8px}
-.chip{font-size:12px;border-radius:5px;padding:2px 8px;cursor:pointer;border:1px solid transparent;user-select:none}
-.chip.fatal{color:var(--bad);background:var(--bad-soft)}
-.chip.warning{color:var(--warn);background:var(--warn-soft)}
-.chip.all{color:var(--muted);background:var(--code)}
-.chip.on{border-color:currentColor}
-.errors{padding:10px 18px;color:var(--bad);background:var(--bad-soft);word-break:break-word}
-.empty{padding:14px 18px;color:var(--ok)}
+#drop.disabled{opacity:.6;cursor:progress}
+.drop-icon{width:52px;height:52px;margin:0 auto 12px;border-radius:14px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center}
+.drop-title{font-size:17px;font-weight:650;margin:0}
+.drop-sub{margin:4px 0 16px;color:var(--muted-fg);font-size:14px}
+.types{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:16px}
+.tag{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;background:var(--card);
+  border:1px solid var(--border);color:var(--fg-2);font-size:12.5px;font-weight:500;white-space:nowrap}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 16px;
+  border-radius:var(--radius-sm);border:1px solid var(--border-strong);background:var(--card);color:var(--fg);
+  font:600 14px/1 var(--font);cursor:pointer;transition:background-color .15s ease,border-color .15s ease,color .15s ease}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn-primary{background:var(--accent);border-color:var(--accent);color:#fff;min-height:44px;padding:0 20px}
+.btn-primary:hover{background:var(--accent-hover);border-color:var(--accent-hover);color:#fff}
+.btn-ghost{border-color:transparent;background:transparent;color:var(--muted-fg)}
+.btn-ghost:hover{background:var(--muted);color:var(--fg);border-color:transparent}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+
+/* options */
+.options{display:flex;flex-wrap:wrap;align-items:center;gap:10px 24px;margin-top:18px;padding-top:16px;border-top:1px solid var(--border)}
+.options-label{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted-fg)}
+.switch{display:inline-flex;align-items:center;gap:10px;min-height:44px;cursor:pointer;font-size:14px;color:var(--fg-2);user-select:none}
+.switch input{position:absolute;opacity:0;width:1px;height:1px}
+.track{width:38px;height:22px;border-radius:999px;background:var(--border-strong);position:relative;transition:background-color .2s ease}
+.track::after{content:"";position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;
+  box-shadow:0 1px 2px rgba(15,23,42,.25);transition:transform .2s ease}
+.switch input:checked + .track{background:var(--accent)}
+.switch input:checked + .track::after{transform:translateX(16px)}
+.switch input:focus-visible + .track{outline:2px solid var(--ring);outline-offset:2px}
+details.rulesets{margin-top:6px}
+details.rulesets summary{cursor:pointer;color:var(--muted-fg);font-size:13.5px;min-height:32px;display:inline-flex;align-items:center;gap:6px}
+details.rulesets summary:hover{color:var(--accent)}
+#rules{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 2px}
+
+/* summary */
+.summary{display:flex;align-items:stretch;gap:12px;flex-wrap:wrap;margin:24px 0 16px}
+.stat{flex:1 1 140px;padding:14px 16px}
+.stat .k{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted-fg)}
+.stat .v{font-size:26px;font-weight:700;line-height:1.2;margin-top:2px;font-variant-numeric:tabular-nums}
+.stat.ok .v{color:var(--ok)} .stat.bad .v{color:var(--bad)}
+.summary .actions{display:flex;align-items:center}
+
+/* result cards */
+#results{display:flex;flex-direction:column;gap:14px}
+.result{overflow:hidden;border-left:4px solid var(--border-strong)}
+.result.PASSED{border-left-color:var(--ok)} .result.FAILED{border-left-color:var(--bad)} .result.RUNNING{border-left-color:var(--accent)}
+.rhead{display:flex;flex-wrap:wrap;align-items:center;gap:12px 16px;padding:16px 18px}
+.status{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;font-size:12.5px;font-weight:700;letter-spacing:.03em;white-space:nowrap}
+.status.PASSED{background:var(--ok-soft);color:var(--ok);border:1px solid var(--ok-line)}
+.status.FAILED{background:var(--bad-soft);color:var(--bad);border:1px solid var(--bad-line)}
+.status.RUNNING{background:var(--accent-soft);color:var(--accent);border:1px solid #BAE6FD}
+.rtitle{min-width:0;flex:1 1 320px}
+.fname{font-weight:650;font-size:15px;word-break:break-all}
+.meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.meta .tag{background:var(--muted);border-color:transparent}
+.ractions{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-left:auto}
+.seg{display:inline-flex;padding:3px;border-radius:10px;background:var(--muted);gap:2px}
+.seg button{border:0;background:transparent;color:var(--muted-fg);font:600 13px/1 var(--font);padding:0 12px;min-height:34px;
+  border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:background-color .15s ease,color .15s ease}
+.seg button:hover{color:var(--fg)}
+.seg button[aria-pressed="true"]{background:var(--card);color:var(--fg);box-shadow:var(--shadow)}
+.count{font-variant-numeric:tabular-nums;padding:1px 7px;border-radius:999px;font-size:12px;background:var(--card);color:var(--fg-2)}
+.seg button[aria-pressed="true"] .count{background:var(--muted)}
+.count.fatal{color:var(--bad)} .count.warning{color:var(--warn)}
+.toggle{width:40px;height:40px;padding:0}
+.toggle svg{transition:transform .2s ease}
+.result.collapsed .toggle svg{transform:rotate(-90deg)}
+.result.collapsed .rbody{display:none}
+.rbody{border-top:1px solid var(--border)}
+.alert{display:flex;gap:10px;padding:12px 18px;background:var(--bad-soft);color:var(--bad);border-bottom:1px solid var(--bad-line);font-size:14px;word-break:break-word}
+.alert svg{margin-top:2px}
+.empty{display:flex;align-items:center;gap:10px;padding:16px 18px;color:var(--ok);font-weight:600;font-size:14px}
 .tablewrap{overflow-x:auto}
 table{border-collapse:collapse;width:100%}
-th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top;font-size:13px}
-th{color:var(--muted);font-weight:600;background:var(--code);white-space:nowrap}
-td.lvl{font-weight:700;white-space:nowrap}
-tr.fatal td.lvl{color:var(--bad)} tr.warning td.lvl{color:var(--warn)}
-td.rule{white-space:nowrap;font-weight:600}
-td.set{white-space:nowrap;color:var(--muted)}
-code{font-family:Consolas,"Cascadia Mono",monospace;font-size:12px;background:var(--code);
-  padding:1px 5px;border-radius:4px;word-break:break-all}
-.hidden{display:none}
-.toolbar{display:flex;gap:10px;align-items:center;margin:0 0 10px}
-.toolbar .meta{margin-right:auto}
-footer{max-width:1200px;margin:0 auto;padding:0 24px 32px;color:var(--muted);font-size:12px}
-footer details summary{cursor:pointer}
-@media (max-width:640px){main{padding:12px 16px 40px}header{padding:14px 16px}.rules{margin-left:0}footer{padding:0 16px 24px}}
+th,td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--border);vertical-align:top;font-size:14px}
+tbody tr:last-child td{border-bottom:0}
+th{position:sticky;top:0;background:#F1F5F9;color:var(--muted-fg);font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;white-space:nowrap}
+tbody tr:hover td{background:#F8FAFC}
+.lvl{display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap}
+.lvl.fatal{background:var(--bad-soft);color:var(--bad)}
+.lvl.warning{background:var(--warn-soft);color:var(--warn)}
+.lvl.information{background:var(--muted);color:var(--fg-2)}
+td.rule{white-space:nowrap}
+.mono{font-family:var(--mono);font-size:12.5px}
+.rule .mono{font-weight:700;color:var(--fg)}
+.msg{color:var(--fg);max-width:70ch}
+.loc{display:block;margin-top:4px;color:var(--muted-fg);font-family:var(--mono);font-size:12px;word-break:break-all}
+td.set{white-space:nowrap;color:var(--muted-fg);font-size:13px}
+.spinner{width:14px;height:14px;border-radius:50%;border:2px solid currentColor;border-right-color:transparent;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* footer */
+footer{max-width:1160px;margin:0 auto;padding:0 24px 40px;color:var(--muted-fg);font-size:13px}
+footer details{border-top:1px solid var(--border);padding-top:14px}
+footer summary{cursor:pointer;font-weight:600;min-height:32px;display:inline-flex;align-items:center}
+footer summary:hover{color:var(--accent)}
+footer p{max-width:110ch}
+
+@media (max-width:720px){
+  .topbar-inner{padding:14px 16px}
+  .privacy{margin-left:0}
+  main{padding:16px 16px 40px}
+  footer{padding:0 16px 32px}
+  .upload{padding:14px}
+  #drop{padding:28px 14px}
+  .ractions{margin-left:0;width:100%}
+  /* findings as stacked blocks instead of a squeezed table */
+  table,tbody,tr,td{display:block;width:100%}
+  thead{display:none}
+  tbody tr{padding:12px 14px;border-bottom:1px solid var(--border)}
+  tbody tr:last-child{border-bottom:0}
+  td{padding:0;border:0}
+  td:first-child,td.rule{display:inline-block;width:auto;margin:0 8px 6px 0;vertical-align:middle}
+  td.set{display:none}
+  tbody tr:hover td{background:transparent}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{transition:none !important;animation:none !important}
+}
 </style>
 </head>
 <body>
-<header>
-  <h1>E-Invoice Validator</h1>
-  <p>UBL 2.1 XSD, EN 16931 / French EXTENDED-CTC-FR and BR-FR rules for UBL invoices and credit notes, BR-FR-CDV for CDAR
-     life-cycle messages, and Flux 10 e-reporting (XSD + rules). Validation runs inside your browser &mdash; files are never uploaded anywhere.</p>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol>
+  <symbol id="i-upload" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></symbol>
+  <symbol id="i-warn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></symbol>
+  <symbol id="i-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></symbol>
+  <symbol id="i-file" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></symbol>
+</svg>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <div class="logo" aria-hidden="true"><svg width="22" height="22"><use href="#i-shield"/></svg></div>
+      <div>
+        <h1>E-Invoice Validator</h1>
+        <p>UBL invoices &amp; credit notes, CDAR status messages and Flux 10 e-reporting &mdash; checked against the official EU and French rules.</p>
+      </div>
+    </div>
+    <span class="privacy"><svg width="15" height="15" aria-hidden="true"><use href="#i-lock"/></svg>Runs in your browser &middot; files never leave this PC</span>
+  </div>
 </header>
+
 <main>
-  <section class="panel">
-    <div id="drop" tabindex="0" class="disabled">
-      <strong>Drop XML files here</strong>
-      <p>or click to choose files &mdash; several at once is fine</p>
+  <section class="card upload" aria-labelledby="upload-title">
+    <div id="drop" class="disabled" aria-describedby="drop-help">
+      <div class="drop-icon" aria-hidden="true"><svg width="26" height="26"><use href="#i-upload"/></svg></div>
+      <p class="drop-title" id="upload-title">Drop XML files here</p>
+      <p class="drop-sub" id="drop-help">Several files at once are fine. Nothing is uploaded.</p>
+      <button type="button" class="btn btn-primary" id="choose" disabled>
+        <svg width="18" height="18" aria-hidden="true"><use href="#i-file"/></svg>Choose files</button>
       <input id="picker" type="file" accept=".xml,text/xml,application/xml" multiple hidden>
+      <div class="types" aria-label="Supported documents">
+        <span class="tag">UBL Invoice</span><span class="tag">UBL Credit Note</span>
+        <span class="tag">CDAR status</span><span class="tag">Flux 10 e-reporting</span>
+      </div>
     </div>
-    <div class="controls">
-      <label><input type="checkbox" id="fr" checked> French BR-FR rules</label>
-      <label><input type="checkbox" id="xsd" checked> XSD schema check</label>
-      <label id="map-opt" class="hidden"><input type="checkbox" id="map" checked> Mapping checks</label>
-      <span class="rules" id="rules">Loading rule sets…</span>
+
+    <div class="options">
+      <span class="options-label">Checks</span>
+      <label class="switch"><input type="checkbox" id="xsd" checked><span class="track" aria-hidden="true"></span>XSD schema</label>
+      <label class="switch"><input type="checkbox" id="fr" checked><span class="track" aria-hidden="true"></span>French BR-FR rules</label>
+      <label class="switch hidden" id="map-opt"><input type="checkbox" id="map" checked><span class="track" aria-hidden="true"></span>Mapping checks</label>
     </div>
+    <details class="rulesets">
+      <summary>Rule sets in this build</summary>
+      <div id="rules" aria-live="polite"><span class="tag">Loading rule sets…</span></div>
+    </details>
   </section>
 
-  <div class="toolbar hidden" id="toolbar">
-    <span class="meta" id="summary"></span>
-    <button id="clear">Clear results</button>
-  </div>
+  <section class="summary hidden" id="toolbar" aria-label="Summary">
+    <div class="card stat"><div class="k">Files</div><div class="v" id="s-files">0</div></div>
+    <div class="card stat ok"><div class="k">Passed</div><div class="v" id="s-pass">0</div></div>
+    <div class="card stat bad"><div class="k">Failed</div><div class="v" id="s-fail">0</div></div>
+    <div class="card stat"><div class="k">Findings</div><div class="v" id="s-find">0</div></div>
+    <div class="actions"><button type="button" class="btn btn-ghost" id="clear">
+      <svg width="16" height="16" aria-hidden="true"><use href="#i-trash"/></svg>Clear results</button></div>
+  </section>
+  <p class="sr-only" id="summary" aria-live="polite"></p>
   <div id="results"></div>
 </main>
+
 <footer>
   <details>
     <summary>About, rule versions and licences</summary>
-    <p>Build: 17.11.2026.</p>
+    <p>Build: 18.11.2026.</p>
     <p>EN 16931 rules: CEN/TC 434 validation artefacts 1.3.17 (ConnectingEurope/eInvoicing-EN16931, EUPL 1.2) &mdash;
        the same rule set as the European Commission eInvoice Validator.<br>
        French rules: FNFE-MPE France_RFE 1.4.0.04 (EXTENDED-CTC-FR-UBL, BR-FR-Flux2-Schematron-UBL, BR-FR-CDV-Schematron-CDAR,
@@ -1532,20 +1668,27 @@ async function validate(name, text, opts) {
 }
 
 /* ---------- page ---------- */
-const drop = $("#drop"), picker = $("#picker");
+const drop = $("#drop"), picker = $("#picker"), choose = $("#choose");
 let ready = false, busy = Promise.resolve();
+const icon = (id, size = 16) => `<svg width="${size}" height="${size}" aria-hidden="true"><use href="#i-${id}"/></svg>`;
+const DOC_LABEL = {Invoice: "UBL Invoice", CreditNote: "UBL Credit Note", CDAR: "CDAR status", Flux10: "Flux 10"};
 
 window.addEventListener("load", () => {
   if (typeof SaxonJS === "undefined" || typeof DecompressionStream === "undefined") {
-    $("#rules").textContent = "This browser is not supported - please use a current Edge, Chrome or Firefox."; return; }
+    $("#rules").innerHTML = `<span class="tag">This browser is not supported - please use a current Edge, Chrome or Firefox.</span>`;
+    $("#drop-help").textContent = "This browser is not supported - please use a current Edge, Chrome or Firefox.";
+    return;
+  }
   $("#map-opt").classList.toggle("hidden", !has("project-map"));
-  $("#rules").textContent = Object.values(RULESETS).filter(r => !r.data || has(r.data)).map(r => r.label).join("  ·  ");
+  $("#rules").innerHTML = Object.values(RULESETS).filter(r => !r.data || has(r.data))
+    .map(r => `<span class="tag">${esc(r.label)}</span>`).join("");
   ready = true;
   drop.classList.remove("disabled");
+  choose.disabled = false;
 });
 
-drop.addEventListener("click", () => ready && picker.click());
-drop.addEventListener("keydown", e => { if (ready && (e.key === "Enter" || e.key === " ")) picker.click(); });
+drop.addEventListener("click", e => { if (ready && e.target.closest("#choose") === null) picker.click(); });
+choose.addEventListener("click", e => { e.stopPropagation(); if (ready) picker.click(); });
 picker.addEventListener("change", () => { handle(picker.files); picker.value = ""; });
 ["dragenter","dragover"].forEach(t => drop.addEventListener(t, e => { e.preventDefault(); drop.classList.add("over"); }));
 ["dragleave","drop"].forEach(t => drop.addEventListener(t, e => { e.preventDefault(); drop.classList.remove("over"); }));
@@ -1558,19 +1701,19 @@ function handle(fileList) {
   const files = [...fileList].filter(f => /\.xml$/i.test(f.name) || (f.type || "").includes("xml"));
   const opts = {fr: $("#fr").checked, xsd: $("#xsd").checked, map: $("#map").checked};
   for (const file of files) {
-    const card = document.createElement("section");
-    card.className = "panel result";
-    card.innerHTML = `<div class="rhead"><span class="badge RUNNING">WAITING</span>
-      <span class="fname">${esc(file.name)}</span></div>`;
+    const card = document.createElement("article");
+    card.className = "card result RUNNING";
+    card.innerHTML = `<div class="rhead"><span class="status RUNNING">${icon("upload", 13)}Waiting</span>
+      <div class="rtitle"><div class="fname">${esc(file.name)}</div></div></div>`;
     $("#results").prepend(card);
     $("#toolbar").classList.remove("hidden");
     busy = busy.then(async () => {           // one file at a time
-      card.querySelector(".badge").textContent = "CHECKING";
+      card.querySelector(".status").innerHTML = `<span class="spinner" aria-hidden="true"></span>Checking`;
       await new Promise(res => setTimeout(res, 30));
       let r;
       try { r = await validate(file.name, await file.text(), opts); }
       catch (e) { r = {file: file.name, errors: [String(e)], findings: [], applied: [], rules: [],
-                       verdict: "FAILED", fatal: 0, warnings: 0, checkedAt: new Date()}; }
+                       verdict: "FAILED", fatal: 0, warnings: 0, profile: "", checkedAt: new Date()}; }
       results.push(r);
       render(card, r);
       updateSummary();
@@ -1579,57 +1722,82 @@ function handle(fileList) {
 }
 
 function render(card, r) {
-  const prof = r.profile ? (r.profile.includes(EXTENDED_MARK) ? " · extended-ctc-fr profile"
-    : r.docType === "Flux10" ? " · " + r.profile : " · " + r.profile) : "";
-  const doc = r.docType ? `${esc(r.docType)} ${esc(r.docId || "")}${esc(prof)}` : "Unknown document";
+  const tags = [];
+  if (r.docType) tags.push(DOC_LABEL[r.docType] || r.docType);
+  if (r.docId) tags.push(r.docId);
+  if (r.profile) tags.push(r.profile.includes(EXTENDED_MARK) ? "extended-ctc-fr profile"
+                         : r.profile.startsWith("urn:") ? r.profile.split("#")[0] : r.profile);
+  const sets = r.applied.length ? r.applied.join(" + ") : "no rules applied";
+  const hasFindings = r.findings.length > 0;
+  card.className = `card result ${r.verdict}` + (!hasFindings && !r.errors.length ? " collapsed" : "");
   card.innerHTML = `
     <div class="rhead">
-      <span class="badge ${r.verdict}">${r.verdict}</span>
-      <div><div class="fname">${esc(r.file)}</div>
-        <div class="meta">${doc} · ${r.rules.length ? esc(r.rules.join(" + ")) : "no rules applied"}</div></div>
-      <div class="actions">
-        <div class="counts">
-          <span class="chip all on" data-f="all">All ${r.findings.length}</span>
-          <span class="chip fatal" data-f="fatal">Fatal ${r.fatal}</span>
-          <span class="chip warning" data-f="warning">Warnings ${r.warnings}</span>
-        </div>
-        <button data-act="report">Save report</button>
+      <span class="status ${r.verdict}">${icon(r.verdict === "PASSED" ? "check" : "x", 13)}${r.verdict === "PASSED" ? "Passed" : "Failed"}</span>
+      <div class="rtitle">
+        <div class="fname">${esc(r.file)}</div>
+        <div class="meta">${tags.map(t => `<span class="tag">${esc(t)}</span>`).join("")}
+          <span class="tag" title="${esc(r.rules.join(" + "))}">${esc(sets)}</span></div>
+      </div>
+      <div class="ractions">
+        ${hasFindings ? `<div class="seg" role="group" aria-label="Filter findings">
+          <button type="button" data-f="all" aria-pressed="true">All <span class="count">${r.findings.length}</span></button>
+          <button type="button" data-f="fatal" aria-pressed="false">Fatal <span class="count fatal">${r.fatal}</span></button>
+          <button type="button" data-f="warning" aria-pressed="false">Warnings <span class="count warning">${r.warnings}</span></button>
+        </div>` : ""}
+        <button type="button" class="btn" data-act="report">${icon("download")}Save report</button>
+        <button type="button" class="btn btn-ghost toggle" data-act="toggle" aria-label="Show or hide details"
+          aria-expanded="${card.classList.contains("collapsed") ? "false" : "true"}">${icon("chevron", 18)}</button>
       </div>
     </div>
-    ${r.errors.length ? `<div class="errors">${r.errors.map(esc).join("<br>")}</div>` : ""}
-    ${r.findings.length ? `<div class="tablewrap"><table>
-      <thead><tr><th>Level</th><th>Rule set</th><th>Rule</th><th>Message</th><th>Location</th></tr></thead>
-      <tbody>${r.findings.map(f => `<tr class="${f.flag}">
-        <td class="lvl">${esc(f.flag.toUpperCase())}</td><td class="set">${esc(f.ruleset)}</td>
-        <td class="rule">${esc(f.id)}</td><td>${esc(f.text)}</td><td><code>${esc(f.location)}</code></td></tr>`).join("")}
-      </tbody></table></div>`
-      : (r.errors.length ? "" : `<div class="empty">No findings — the document meets all applied rules.</div>`)}`;
+    <div class="rbody">
+      ${r.errors.length ? `<div class="alert" role="alert">${icon("alert")}<div>${r.errors.map(esc).join("<br>")}</div></div>` : ""}
+      ${hasFindings ? `<div class="tablewrap"><table>
+        <thead><tr><th scope="col">Level</th><th scope="col">Rule</th><th scope="col">Message</th><th scope="col" class="set">Rule set</th></tr></thead>
+        <tbody>${r.findings.map(f => `<tr data-flag="${f.flag}">
+          <td><span class="lvl ${f.flag}">${icon(f.flag === "fatal" ? "x" : "warn", 12)}${f.flag === "fatal" ? "Fatal" : f.flag === "warning" ? "Warning" : "Info"}</span></td>
+          <td class="rule"><span class="mono">${esc(f.id || "-")}</span></td>
+          <td><div class="msg">${esc(f.text)}</div>${f.location ? `<span class="loc">${esc(f.location)}</span>` : ""}</td>
+          <td class="set">${esc(f.ruleset)}</td></tr>`).join("")}
+        </tbody></table></div>`
+        : (r.errors.length ? "" : `<div class="empty">${icon("check", 18)}No findings &mdash; the document meets all applied rules.</div>`)}
+    </div>`;
 
-  card.querySelectorAll(".chip").forEach(chip => chip.addEventListener("click", () => {
-    card.querySelectorAll(".chip").forEach(c => c.classList.toggle("on", c === chip));
+  card.querySelectorAll(".seg button").forEach(b => b.addEventListener("click", () => {
+    card.querySelectorAll(".seg button").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
     card.querySelectorAll("tbody tr").forEach(tr =>
-      tr.classList.toggle("hidden", chip.dataset.f !== "all" && !tr.classList.contains(chip.dataset.f)));
+      tr.classList.toggle("hidden", b.dataset.f !== "all" && tr.dataset.flag !== b.dataset.f));
   }));
   card.querySelector('[data-act="report"]').addEventListener("click", () => saveReport(r));
+  const t = card.querySelector('[data-act="toggle"]');
+  t.addEventListener("click", () => {
+    const collapsed = card.classList.toggle("collapsed");
+    t.setAttribute("aria-expanded", String(!collapsed));
+  });
 }
 
 function updateSummary() {
   const passed = results.filter(r => r.verdict === "PASSED").length;
+  const findings = results.reduce((n, r) => n + r.findings.length, 0);
+  $("#s-files").textContent = results.length;
+  $("#s-pass").textContent = passed;
+  $("#s-fail").textContent = results.length - passed;
+  $("#s-find").textContent = findings;
   $("#summary").textContent = results.length
-    ? `${results.length} file(s) checked · ${passed} passed · ${results.length - passed} failed` : "";
+    ? `${results.length} file(s) checked, ${passed} passed, ${results.length - passed} failed` : "";
   if (!results.length && !$("#results").children.length) $("#toolbar").classList.add("hidden");
 }
 
 function saveReport(r) {
   const rows = r.findings.map(f => `<tr><td class="${f.flag}">${esc(f.flag.toUpperCase())}</td><td>${esc(f.ruleset)}</td>
-    <td>${esc(f.id)}</td><td>${esc(f.text)}</td><td><code>${esc(f.location)}</code></td></tr>`).join("");
+    <td><code>${esc(f.id)}</code></td><td>${esc(f.text)}</td><td><code>${esc(f.location)}</code></td></tr>`).join("");
   const html = `<!doctype html><html><head><meta charset="utf-8"><title>${esc(r.file)} - validation</title>
-<style>body{font-family:Segoe UI,Arial,sans-serif;margin:24px;color:#1d2330}table{border-collapse:collapse;width:100%}
-td,th{border:1px solid #ccc;padding:6px;vertical-align:top;font-size:13px;text-align:left}th{background:#eee}
-.fatal{color:#b00020;font-weight:bold}.warning{color:#a06000;font-weight:bold}.PASSED{color:#1b7f1b}.FAILED{color:#b00020}
-code{font-size:12px;word-break:break-all}</style></head><body>
-<h2>E-invoice validation - <span class="${r.verdict}">${r.verdict}</span></h2>
-<p>File: <b>${esc(r.file)}</b><br>Document: ${esc(r.docType || "")} ${esc(r.docId || "")}<br>
+<style>body{font-family:"Segoe UI",Arial,sans-serif;margin:32px;color:#020617;background:#fff}
+h2{margin:0 0 12px}table{border-collapse:collapse;width:100%}
+td,th{border:1px solid #E2E8F0;padding:8px;vertical-align:top;font-size:13px;text-align:left}th{background:#F1F5F9;color:#475569}
+.fatal{color:#B91C1C;font-weight:bold}.warning{color:#92400E;font-weight:bold}.PASSED{color:#047857}.FAILED{color:#B91C1C}
+.meta{color:#334155;line-height:1.7}code{font-family:Consolas,monospace;font-size:12px;word-break:break-all}</style></head><body>
+<h2>Validation report &mdash; <span class="${r.verdict}">${r.verdict}</span></h2>
+<p class="meta">File: <b>${esc(r.file)}</b><br>Document: ${esc(r.docType || "")} ${esc(r.docId || "")}<br>
 Rules: ${esc(r.rules.join(" + ") || "none")}<br>Run: ${r.checkedAt.toLocaleString()}<br>
 Fatal: ${r.fatal} &nbsp; Warnings: ${r.warnings}</p>
 ${r.errors.length ? `<p class="fatal">${r.errors.map(esc).join("<br>")}</p>` : ""}
